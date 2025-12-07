@@ -1,7 +1,5 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-# Import explicitly to avoid conflicts
-import youtube_transcript_api
 from youtube_transcript_api import YouTubeTranscriptApi
 
 app = Flask(__name__)
@@ -15,18 +13,16 @@ def get_transcript():
         return jsonify({"error": "No video_id provided"}), 400
 
     try:
-        # Debugging: Print version to logs
-        print(f"Using library version: {youtube_transcript_api.__version__}")
-        
         # Fetch transcript
         transcript_list = YouTubeTranscriptApi.get_transcript(video_id)
         
-        # Combine
+        # Combine into a single string
         full_text = " ".join([t['text'] for t in transcript_list])
         return jsonify({"transcript": full_text})
     
     except Exception as e:
-        print(f"Error: {e}")
+        # Print error to Render logs
+        print(f"Error fetching transcript: {e}")
         return jsonify({"error": str(e)}), 500
 
 if __name__ == '__main__':
