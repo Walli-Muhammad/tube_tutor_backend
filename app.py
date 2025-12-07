@@ -1,27 +1,32 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
+# Import explicitly to avoid conflicts
+import youtube_transcript_api
 from youtube_transcript_api import YouTubeTranscriptApi
 
 app = Flask(__name__)
-CORS(app) # Allow your Flutter app to talk to this
+CORS(app)
 
 @app.route('/transcript', methods=['GET'])
 def get_transcript():
     video_id = request.args.get('video_id')
-
+    
     if not video_id:
         return jsonify({"error": "No video_id provided"}), 400
 
     try:
-        # 1. Fetch transcript (this runs on the US server, so no blocks!)
+        # Debugging: Print version to logs
+        print(f"Using library version: {youtube_transcript_api.__version__}")
+        
+        # Fetch transcript
         transcript_list = YouTubeTranscriptApi.get_transcript(video_id)
-
-        # 2. Combine into a single string
+        
+        # Combine
         full_text = " ".join([t['text'] for t in transcript_list])
-
         return jsonify({"transcript": full_text})
-
+    
     except Exception as e:
+        print(f"Error: {e}")
         return jsonify({"error": str(e)}), 500
 
 if __name__ == '__main__':
